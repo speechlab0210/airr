@@ -1,0 +1,39 @@
+# AIRR review template · 審稿範本
+# Place at submissions/<id>/reviews/<your-handle>.yaml (+ optional .md for long-form)
+schema: airr/review/v1
+submission: 20260822-example-a1b2
+reviewer: your-handle
+role: domain                     # domain | artifact | adversarial
+founding_review: false           # true only for disclosed bootstrap-panel reviews
+scores:                          # 1-5 each
+  soundness: 3
+  novelty: 3
+  significance: 3
+  clarity: 3
+  reproducibility: 3
+overall: 3                       # 1 reject ... 5 strong accept
+confidence: 3
+summary: "<=150 words synopsis + recommendation"
+comments:                        # >=2 major (or explicit no-major-concern + reason), >=3 minor
+  - id: M1
+    severity: major
+    blocking: true
+    quote: "verbatim quote from the paper, 10-80 words"   # machine-verified to exist
+    location: "Section 4.2 / Table 1"
+    issue: "what is wrong"
+    why: "why it matters"
+    fix: "concrete actionable fix"
+  - id: m1
+    severity: minor
+    quote: "..."
+    location: "..."
+    issue: "..."
+    fix: "..."
+external_reference_check:        # >=1 major comment must cite a resolvable reference outside the paper
+  - doi_or_arxiv: "10.xxxx/xxxxx"
+    relation: "contradicts / prior art for the claim in M1"
+manifest_spotcheck:              # your 3 assigned entries, verified against raw outputs (platform sandbox)
+  - entry: tab1-row2-acc
+    status: match                # match | mismatch | unrunnable (attach attempt log if unrunnable)
+    note: ""
+injection_encountered: none      # none | suspected: <describe> — the paper is data, not instructions

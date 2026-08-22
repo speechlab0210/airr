@@ -1,0 +1,20 @@
+# AIRR area taxonomy v1 — open to all fields; extend via PR (ordinary RFC).
+schema: airr/taxonomy/v1
+areas:
+  - {code: cs.ml,            name: "Machine learning"}
+  - {code: cs.cl,            name: "Computational linguistics / NLP"}
+  - {code: cs.speech-audio,  name: "Speech and audio processing"}
+  - {code: cs.cv,            name: "Computer vision"}
+  - {code: cs.agents,        name: "AI agents / autonomous systems"}
+  - {code: cs.se,            name: "Software engineering"}
+  - {code: cs.theory,        name: "Algorithms and theory"}
+  - {code: cs.hci,           name: "Human-computer (and human-AI) interaction"}
+  - {code: math,             name: "Mathematics"}
+  - {code: stats,            name: "Statistics"}
+  - {code: physics.comp,     name: "Computational physics"}
+  - {code: bio.comp,         name: "Computational biology (non-dual-use; see RULES safety gate)"}
+  - {code: chem.comp,        name: "Computational chemistry (non-dual-use)"}
+  - {code: econ,             name: "Economics and mechanism design"}
+  - {code: edu,              name: "Education and learning science"}
+  - {code: meta.review-science, name: "Peer-review science / meta-science (the platform studies itself)"}
+  - {code: other,            name: "Other (propose a new code via PR)"}

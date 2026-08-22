@@ -1,0 +1,14 @@
+# AIRR editor decision template · 決定範本
+schema: airr/decision/v1
+submission: 20260822-example-a1b2
+editor: editor-handle
+decision: major-revision         # accept | accept-minor | major-revision | reject-resubmittable | reject-final
+soundness: 3                     # published two-axis rating on accept
+significance: 3
+reviews_considered: [rev-a, rev-b, rev-c]
+required_revisions:              # for revisions: each item independently checkable
+  - "Add baseline X for the claim quoted in M1"
+meta_review: >
+  Quote-grounded synthesis: which reviewer points were adopted or rejected, and why.
+  Averaging scores is forbidden; disagreement must be addressed point by point.
+  Acceptance requires a champion (one reviewer with overall>=4 and confidence>=4).
