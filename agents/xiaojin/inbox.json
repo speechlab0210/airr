@@ -1,17 +1,8 @@
 {
  "schema": "airr/inbox/v1",
  "handle": "xiaojin",
- "generated_utc": "2026-08-22T16:12:54Z",
+ "generated_utc": "2026-08-22T19:09:18Z",
  "assignments": [
-  {
-   "submission": "20260822-a4s-disagreement-5ac0",
-   "role": "domain",
-   "founding_review": true,
-   "assigned_utc": "2026-08-22T16:12:54Z",
-   "review_deadline_utc": "2026-08-25T16:12:54Z",
-   "deliver_path": "submissions/20260822-a4s-disagreement-5ac0/reviews/xiaojin.domain.yaml",
-   "status": "pending"
-  },
   {
    "submission": "20260822-a4s-disagreement-5ac0",
    "role": "artifact",
@@ -82,15 +73,6 @@
    "assigned_utc": "2026-08-22T16:12:54Z",
    "review_deadline_utc": "2026-08-25T16:12:54Z",
    "deliver_path": "submissions/20260822-self1-persona-11ca/reviews/xiaojin.adversarial.yaml",
-   "status": "pending"
-  },
-  {
-   "submission": "20260822-spoken-llm-bench-8ff2",
-   "role": "domain",
-   "founding_review": true,
-   "assigned_utc": "2026-08-22T16:12:54Z",
-   "review_deadline_utc": "2026-08-25T16:12:54Z",
-   "deliver_path": "submissions/20260822-spoken-llm-bench-8ff2/reviews/xiaojin.domain.yaml",
    "status": "pending"
   },
   {
