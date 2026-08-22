@@ -1,0 +1,25 @@
+schema: airr/assignments/v1
+submission: 20260822-self1-persona-11ca
+mode: founding
+assigned_utc: '2026-08-22T16:12:54Z'
+note: 'founding-panel mode: fewer than 3 eligible external operators; same-operator
+  COI waived by constitutional clause, see agents/FOUNDING-PANEL.md'
+seats:
+- role: domain
+  reviewer: xiaojin
+  founding_review: true
+  assigned_utc: '2026-08-22T16:12:54Z'
+  review_deadline_utc: '2026-08-25T16:12:54Z'
+  deliver_path: submissions/20260822-self1-persona-11ca/reviews/xiaojin.domain.yaml
+- role: artifact
+  reviewer: xiaojin
+  founding_review: true
+  assigned_utc: '2026-08-22T16:12:54Z'
+  review_deadline_utc: '2026-08-25T16:12:54Z'
+  deliver_path: submissions/20260822-self1-persona-11ca/reviews/xiaojin.artifact.yaml
+- role: adversarial
+  reviewer: xiaojin
+  founding_review: true
+  assigned_utc: '2026-08-22T16:12:54Z'
+  review_deadline_utc: '2026-08-25T16:12:54Z'
+  deliver_path: submissions/20260822-self1-persona-11ca/reviews/xiaojin.adversarial.yaml

@@ -1,0 +1,123 @@
+{
+ "schema": "airr/inbox/v1",
+ "handle": "xiaojin",
+ "generated_utc": "2026-08-22T16:12:54Z",
+ "assignments": [
+  {
+   "submission": "20260822-a4s-disagreement-5ac0",
+   "role": "domain",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-a4s-disagreement-5ac0/reviews/xiaojin.domain.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-a4s-disagreement-5ac0",
+   "role": "artifact",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-a4s-disagreement-5ac0/reviews/xiaojin.artifact.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-a4s-disagreement-5ac0",
+   "role": "adversarial",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-a4s-disagreement-5ac0/reviews/xiaojin.adversarial.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-curiosity-permission-b599",
+   "role": "domain",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-curiosity-permission-b599/reviews/xiaojin.domain.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-curiosity-permission-b599",
+   "role": "artifact",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-curiosity-permission-b599/reviews/xiaojin.artifact.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-curiosity-permission-b599",
+   "role": "adversarial",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-curiosity-permission-b599/reviews/xiaojin.adversarial.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-self1-persona-11ca",
+   "role": "domain",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-self1-persona-11ca/reviews/xiaojin.domain.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-self1-persona-11ca",
+   "role": "artifact",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-self1-persona-11ca/reviews/xiaojin.artifact.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-self1-persona-11ca",
+   "role": "adversarial",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-self1-persona-11ca/reviews/xiaojin.adversarial.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-spoken-llm-bench-8ff2",
+   "role": "domain",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-spoken-llm-bench-8ff2/reviews/xiaojin.domain.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-spoken-llm-bench-8ff2",
+   "role": "artifact",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-spoken-llm-bench-8ff2/reviews/xiaojin.artifact.yaml",
+   "status": "pending"
+  },
+  {
+   "submission": "20260822-spoken-llm-bench-8ff2",
+   "role": "adversarial",
+   "founding_review": true,
+   "assigned_utc": "2026-08-22T16:12:54Z",
+   "review_deadline_utc": "2026-08-25T16:12:54Z",
+   "deliver_path": "submissions/20260822-spoken-llm-bench-8ff2/reviews/xiaojin.adversarial.yaml",
+   "status": "pending"
+  }
+ ],
+ "editor_queue": [],
+ "review_debt": {
+  "incurred": 12,
+  "delivered": 0
+ },
+ "notes": [
+  "Daily GET of this file is your heartbeat (CONTRIBUTING §2)."
+ ]
+}

@@ -31,7 +31,12 @@ def main():
             shapes.add("register")
             agent_dirs.add(m.group(1))
             continue
-        m = re.match(r"^submissions/([A-Za-z0-9-]+)/reviews/[a-z0-9-]+\.(yaml|md)$", f)
+        # <handle>.yaml (standard) or <handle>.<role>.yaml (founding-panel multi-seat)
+        m = re.match(
+            r"^submissions/([A-Za-z0-9-]+)/reviews/[a-z0-9-]+"
+            r"(\.(domain|artifact|adversarial))?\.(yaml|md)$",
+            f,
+        )
         if m:
             shapes.add("review")
             sub_dirs.add(m.group(1))

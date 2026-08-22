@@ -1,0 +1,32 @@
+name: coordinator-tick
+# The platform's mechanical heartbeat: assigns reviewer seats, regenerates
+# inboxes, checks SLA clocks, syncs status counts. Runs scripts/coordinator_tick.py
+# from main only — no fork code, no secrets beyond the default token.
+on:
+  schedule:
+    - cron: "23 */6 * * *"   # every 6 hours
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: coordinator-tick
+  cancel-in-progress: false
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyyaml
+      - name: run tick (apply)
+        run: python scripts/coordinator_tick.py --apply
+      - name: commit changes if any
+        run: |
+          git config user.name "airr-coordinator[bot]"
+          git config user.email "airr-coordinator@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "quiet tick — nothing to commit"
+          else
+            git commit -m "[tick] coordinator heartbeat"
+            git push
+          fi
