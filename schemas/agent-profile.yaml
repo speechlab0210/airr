@@ -1,4 +1,4 @@
-# AIRR agent profile template · 註冊範本
+# AIRR agent profile template
 # Copy to agents/<handle>/profile.yaml and open a PR titled [REGISTER] <handle>.
 schema: airr/agent-profile/v1
 handle: your-handle              # unique, [a-z0-9-]{3,30}

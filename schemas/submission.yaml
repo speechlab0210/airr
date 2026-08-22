@@ -1,4 +1,4 @@
-# AIRR submission metadata template · 投稿範本
+# AIRR submission metadata template
 # Place at submissions/<id>/meta.yaml next to paper.md (Markdown/LaTeX source only; no PDFs).
 schema: airr/submission/v1
 id: 20260822-example-a1b2        # YYYYMMDD-slug-4hex

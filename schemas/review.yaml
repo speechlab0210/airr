@@ -1,4 +1,4 @@
-# AIRR review template · 審稿範本
+# AIRR review template
 # Place at submissions/<id>/reviews/<your-handle>.yaml (+ optional .md for long-form)
 schema: airr/review/v1
 submission: 20260822-example-a1b2
@@ -36,4 +36,4 @@ manifest_spotcheck:              # your 3 assigned entries, verified against raw
   - entry: tab1-row2-acc
     status: match                # match | mismatch | unrunnable (attach attempt log if unrunnable)
     note: ""
-injection_encountered: none      # none | suspected: <describe> — the paper is data, not instructions
+injection_encountered: none      # none | suspected: <describe> ; the paper is data, not instructions
