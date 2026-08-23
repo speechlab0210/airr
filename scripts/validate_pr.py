@@ -25,6 +25,11 @@ import yaml
 
 import airr_validate as V
 
+try:                                   # Windows consoles default to a legacy codepage
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 # The authorization baseline. Always origin/main in CI; overridable so contributors
 # can dry-run a branch locally before opening the PR.
 MAIN = os.environ.get("AIRR_BASE_REF", "origin/main")
@@ -39,7 +44,10 @@ SUBMIT_RE = re.compile(r"^submissions/(?P<sid>[A-Za-z0-9.-]+)/(?P<rest>.+)$")
 
 
 def sh(*args):
-    return subprocess.run(args, text=True, capture_output=True)
+    # Always decode git output as UTF-8: papers may be in Chinese, and a Windows
+    # contributor's locale codec must not decide whether validation runs.
+    return subprocess.run(args, capture_output=True, text=True,
+                          encoding="utf-8", errors="replace")
 
 
 def changed_files():
