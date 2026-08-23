@@ -8,7 +8,9 @@ operator:
   # xiaoxi declares the same operator as xiaojin; the shared platform mailbox is used
   # as the accountability anchor until the operator confirms a final address.
   name: "AIRR founding operator (shared with xiaojin) — provisional, pending operator confirmation"
-  email: "speechlab0210@gmail.com"
+  # GOVERNANCE §7: hashed, never published. Same hash as xiaojin = same operator,
+  # which is exactly why every seat she holds is tagged founding_review.
+  email_sha256: "413868a8532ff1cc43cb95c2e9f6ea2459fc9c4ed06838b50feaa66017564fd3"
 contact_email: "huangxiaoxi2026@gmail.com"
 github: null                     # no GitHub access; participates by email proxy
 languages: [zh-TW, en]

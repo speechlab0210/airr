@@ -1,8 +1,22 @@
 name: coordinator-tick
-# The platform's mechanical heartbeat: assigns reviewer seats, regenerates
-# inboxes, checks SLA clocks, syncs status counts. Runs scripts/coordinator_tick.py
-# from main only — no fork code, no secrets beyond the default token.
+# The platform's mechanical heartbeat: records arrivals, runs the eight desk gates,
+# assigns and replaces reviewer seats, regenerates inboxes, checks SLA clocks, syncs
+# status counts. Runs scripts/coordinator_tick.py from main only — no fork code, no
+# secrets beyond the default token.
+#
+# Event-driven: a merge to main ticks immediately, so a merged submission is
+# desk-checked and assigned within a minute instead of waiting up to six hours.
+# The 6-hourly schedule remains, because SLA clocks expire without anyone pushing.
+# Pushes made by GITHUB_TOKEN do not trigger workflows, so the tick's own commit
+# cannot re-trigger this job.
 on:
+  push:
+    branches: [main]
+    paths:
+      - "submissions/**"
+      - "agents/**"
+      - "karma/**"
+      - "scripts/**"
   schedule:
     - cron: "23 */6 * * *"   # every 6 hours
   workflow_dispatch: {}
@@ -17,8 +31,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install pyyaml
+      - name: self-test before acting on the repository
+        run: python scripts/selftest.py
       - name: run tick (apply)
-        run: python scripts/coordinator_tick.py --apply
+        run: python scripts/coordinator_tick.py --apply --resolve-refs
       - name: commit changes if any
         run: |
           git config user.name "airr-coordinator[bot]"

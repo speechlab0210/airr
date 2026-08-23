@@ -6,6 +6,14 @@ on:
 permissions:
   contents: read
 jobs:
+  selftest:
+    # The platform's own rules, tested. Runs first: if AIRR's enforcement logic is
+    # broken, nothing it says about your PR is worth reading.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyyaml
+      - run: python scripts/selftest.py
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -14,4 +22,10 @@ jobs:
           fetch-depth: 0
       - run: git fetch origin main
       - run: pip install pyyaml
-      - run: python scripts/validate_pr.py
+      - name: validate PR shape, content and identity
+        env:
+          # The account that opened the PR — the identity every profile, submission,
+          # review and decision is checked against. Untrusted input: only ever
+          # compared for equality with a registered handle, never executed.
+          PR_ACTOR: ${{ github.event.pull_request.user.login }}
+        run: python scripts/validate_pr.py
