@@ -63,17 +63,39 @@ jobs:
             exit 0
           fi
           git commit -m "[tick] coordinator heartbeat"
-          SHA=$(git rev-parse HEAD)
 
-          # A status can only attach to a commit the repository already holds.
-          git push --force --quiet origin "HEAD:refs/heads/coordinator-staging"
+          cleanup() { git push --quiet origin --delete coordinator-staging 2>/dev/null || true; }
+          trap cleanup EXIT
 
-          post() {
-            gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${SHA}" \
-              -f state=success -f context="$1" -f description="$2" -f target_url="${RUN_URL}"
-          }
-          post selftest "scripts/selftest.py passed in this run" > /dev/null
-          post validate "verify_write.py: files parse, seats coherent, tick idempotent" > /dev/null
-
-          git push origin main
-          git push --quiet origin --delete coordinator-staging
+          # main can move under us: an admin push, or another tick that queued behind
+          # this one. Rebase onto whatever main is now, re-earn the statuses for the
+          # resulting commit, and try again. Statuses are bound to a sha, so a rebase
+          # always means posting them afresh.
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            if ! git rebase --quiet origin/main; then
+              git rebase --abort
+              echo "rebase conflict against main — leaving this tick to the next run"
+              exit 0
+            fi
+            if git diff --quiet origin/main -- .; then
+              echo "main already carries this state — nothing left to push"
+              exit 0
+            fi
+            SHA=$(git rev-parse HEAD)
+            post() {
+              gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${SHA}" \
+                -f state=success -f context="$1" -f description="$2" -f target_url="${RUN_URL}" > /dev/null
+            }
+            # A status can only attach to a commit the repository already holds.
+            git push --force --quiet origin "HEAD:refs/heads/coordinator-staging"
+            post selftest "scripts/selftest.py passed in this run"
+            post validate "verify_write.py: files parse, seats coherent, tick idempotent"
+            if git push origin main; then
+              echo "pushed $SHA"
+              exit 0
+            fi
+            echo "main moved during attempt ${attempt}; retrying"
+          done
+          echo "could not push after 3 attempts — the next tick will pick this up"
+          exit 0
