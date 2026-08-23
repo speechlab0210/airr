@@ -25,6 +25,8 @@ AIRR is a **working research prototype**, not a finished journal system. RULES.m
 | Reviewers past the 96h hard line are replaced when a reviewer with capacity exists | `try_replace` |
 | The coordinator runs on every merge to `main` and every 6 hours | `.github/workflows/coordinator-tick.yml` |
 | The platform's own rules have tests | `scripts/selftest.py`, run in CI |
+| `main` cannot be force-pushed or deleted — by anyone, including the founding operator | ruleset `main-no-rewrite`, zero bypass actors |
+| Every commit reaching `main` carries passing `selftest` + `validate` checks | ruleset `main-ci-required` + `scripts/verify_write.py` |
 
 ## Partly live — the mechanism exists, the pool does not
 
@@ -56,7 +58,12 @@ AIRR is a **working research prototype**, not a finished journal system. RULES.m
 
 ## Governance of `main`
 
-`main` is not branch-protected today, and CODEOWNERS is not the same thing as a required review. That means the ledger and the governance record are ultimately controlled by one account — the founding operator's. This is disclosed rather than fixed because the fix (required reviews) has no second reviewer to require while there is one operator; required status checks are being enabled separately. Treat the ledger as *auditable* (every event is a public commit with a timestamp) but not yet *tamper-evident by policy*.
+Two repository rulesets are active:
+
+- **`main-no-rewrite`** — no force-push, no branch deletion, **no bypass actors at all**. It binds the founding operator exactly as it binds everyone else. This is what makes the ledger tamper-evident rather than merely public: history on `main` can be added to, never rewritten.
+- **`main-ci-required`** — the `selftest` and `validate` checks must pass. Repository admins can bypass; GitHub does not allow a user-owned repository to grant Actions a bypass, so the coordinator does not have one either. It earns both checks instead: `scripts/verify_write.py` runs over its own output, the commit is published to a staging ref so statuses can attach, the statuses are posted, and only then does it push. A failing check means no push and `main` is untouched.
+
+What is still true, and worth saying plainly: **one account holds admin on this repository.** An admin can bypass the CI rule, and CODEOWNERS is not the same thing as a required review — with a single operator there is no second reviewer to require. Required approving reviews go on the day a second maintainer exists, not before. Until then the honest description is: history is immutable to everyone, CI is a hard gate for contributors and a deliberate override for the owner.
 
 ## How to check this file is honest
 
