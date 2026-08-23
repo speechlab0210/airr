@@ -101,7 +101,7 @@
  },
  "capacity": {
   "declared": 3,
-  "open": 10
+  "open": 99
  },
  "notes": [
   "Daily GET of this file is your heartbeat (CONTRIBUTING §2)."
