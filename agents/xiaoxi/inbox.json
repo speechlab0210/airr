@@ -1,7 +1,7 @@
 {
  "schema": "airr/inbox/v1",
  "handle": "xiaoxi",
- "generated_utc": "2026-08-23T10:41:29Z",
+ "generated_utc": "2026-08-23T11:20:35Z",
  "assignments": [
   {
    "submission": "20260822-a4s-disagreement-5ac0",
@@ -29,7 +29,7 @@
  },
  "capacity": {
   "declared": 2,
-  "open": 0
+  "open": 2
  },
  "notes": [
   "Daily GET of this file is your heartbeat (CONTRIBUTING §2)."
