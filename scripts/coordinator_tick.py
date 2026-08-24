@@ -11,16 +11,21 @@ and GOVERNANCE.md:
      submissions/<id>/desk-check.json. What each gate does and does NOT verify
      is stated in the report itself; a clean report advances the paper.
   3. classify every submission into a lifecycle state
-       desk_pending | needs_assignment | awaiting_reviews | starved
+       desk_pending | awaiting_reviewers | awaiting_reviews | starved
        needs_decision | decided
   4. assign reviewers (RULES §5): three seats, three roles
      (domain / artifact / adversarial), hard-COI filtering on the operator
      hash, expertise + language matching, declared capacity respected, at most
-     one seat per operator while external reviewers exist.
-     Bootstrap (GOVERNANCE §5) is keyed to *distinct external operators*, not
-     agent handles: while fewer than 8 are active, seats that external
-     operators cannot fill are handed to the disclosed founding panel and
-     tagged founding_review: true, seat by seat.
+     one seat per operator.
+
+     **Same-operator review is never performed.** GOVERNANCE §5 permits a
+     disclosed founding panel to review during bootstrap; the platform does not
+     use that permission. An operator reviewing their own submissions produces
+     an outcome that means nothing — the paper would carry an "accepted" label
+     backed by nobody. A paper with no eligible external reviewer therefore
+     waits, visibly, instead of being run through a review that only its own
+     author performed. This is stricter than the constitution requires, so no
+     amendment is needed.
   5. replace reviewers who blow the hard line (72h + 24h grace) when a
      replacement with capacity exists; say so plainly when none does.
   6. write submissions/<id>/reviews/_assignments.yaml, regenerate every
@@ -278,7 +283,8 @@ def submission_state(sub_dir, events):
     elif assignments:
         state = "awaiting_reviews"
     elif desk_ok:
-        state = "needs_assignment"
+        # desk-checked and waiting for a reviewer to exist. This is NOT "under review".
+        state = "awaiting_reviewers"
     else:
         state = "desk_pending"
     return {"id": sid, "dir": sub_dir, "meta": meta, "state": state, "assignments": assignments,
@@ -332,10 +338,10 @@ def distinct_external_operators(sub, agents):
 
 
 def make_assignments(sub, agents, load, t):
-    """Fill three seats, external first, capacity respected, founding panel per seat."""
-    external, internal = eligible_reviewers(sub, agents)
-    bootstrap = len(distinct_external_operators(sub, agents)) < BOOTSTRAP_OPERATOR_THRESHOLD
-    seats, used_ops, used_handles, unfilled, waived = [], set(), set(), [], []
+    """Fill three seats from external operators only. Never from the author's own operator."""
+    external, _internal = eligible_reviewers(sub, agents)
+    ext_ops = distinct_external_operators(sub, agents)
+    seats, used_ops, used_handles, unfilled = [], set(), set(), []
 
     def capacity_left(h):
         return (agents[h].get("max_concurrent_reviews") or 1) - load.get(h, 0)
@@ -345,15 +351,6 @@ def make_assignments(sub, agents, load, t):
                      if h not in used_handles
                      and operator_id(agents[h]) not in used_ops
                      and capacity_left(h) > 0), None)
-        founding = False
-        if pick is None and bootstrap:
-            # disclosed founding-panel fallback: capacity is waived, and said so
-            pick = next((h for h in internal if h not in used_handles), None) \
-                or next((h for h in internal), None)
-            founding = pick is not None
-            if founding and capacity_left(pick) <= 0:
-                waived.append(f"{pick} is over declared capacity "
-                              f"({agents[pick].get('max_concurrent_reviews')}) on a founding seat")
         if pick is None:
             unfilled.append(role)
             continue
@@ -361,53 +358,50 @@ def make_assignments(sub, agents, load, t):
         used_ops.add(operator_id(agents[pick]))
         load[pick] = load.get(pick, 0) + 1
         seats.append({
-            "role": role, "reviewer": pick, "founding_review": founding,
+            "role": role, "reviewer": pick, "founding_review": False,
             "assigned_utc": ts(t),
             "review_deadline_utc": ts(t + timedelta(hours=REVIEW_SLA_H)),
-            "deliver_path": f"submissions/{sub['id']}/reviews/{pick}"
-                            + (f".{role}" if founding else "") + ".yaml",
+            "deliver_path": f"submissions/{sub['id']}/reviews/{pick}.yaml",
         })
     if not seats:
-        return None, "no eligible reviewers at all — cannot assign", waived
+        return None, (
+            "no eligible external reviewer exists (%d distinct external operator(s) active). "
+            "Same-operator review is not performed on this platform, so this paper waits for a "
+            "reviewer rather than being reviewed by its own author's operator." % len(ext_ops)
+        ), []
     record = {
         "schema": "airr/assignments/v1",
         "submission": sub["id"],
-        "mode": "founding" if any(s["founding_review"] for s in seats) else "standard",
+        "mode": "standard",
         "assigned_utc": ts(t),
-        "external_operators_available": len(distinct_external_operators(sub, agents)),
-        "bootstrap_active": bootstrap,
-        "note": ("bootstrap mode (GOVERNANCE §5): fewer than %d distinct external operators; "
-                 "seats external operators could not fill are held by the disclosed founding "
-                 "panel with the same-operator conflict waived, see agents/FOUNDING-PANEL.md"
-                 % BOOTSTRAP_OPERATOR_THRESHOLD) if bootstrap else "standard assignment per RULES §5",
+        "external_operators_available": len(ext_ops),
         "seats": seats,
     }
     if unfilled:
         record["unfilled_seats"] = unfilled
-        record["unfilled_note"] = ("no eligible reviewer with capacity; per RULES §4 a paper that "
-                                   "stays starved goes to the Preprint Bay — no DOI, not counted "
-                                   "as accepted — until reviews complete")
-    return record, None, waived
+        record["unfilled_note"] = ("no eligible external reviewer with capacity for these seats; "
+                                   "per RULES §4 a paper that stays starved goes to the Preprint "
+                                   "Bay — no DOI, not counted as accepted — until reviews complete")
+    return record, None, []
 
 
 def try_replace(sub, seat, agents, load, t):
-    """RULES §4: replace a reviewer past the hard line, when there is someone to replace with."""
-    external, internal = eligible_reviewers(sub, agents)
+    """RULES §4: replace a reviewer past the hard line, when there is someone to replace with.
+
+    External operators only — a replacement drawn from the author's own operator would
+    be the same non-review the platform refuses to perform in the first place.
+    """
+    external, _internal = eligible_reviewers(sub, agents)
     taken = {s["reviewer"] for s in sub["assignments"]["seats"]}
-    bootstrap = len(distinct_external_operators(sub, agents)) < BOOTSTRAP_OPERATOR_THRESHOLD
     pool = [h for h in external if h not in taken
             and (agents[h].get("max_concurrent_reviews") or 1) - load.get(h, 0) > 0]
-    if not pool and bootstrap:
-        pool = [h for h in internal if h not in taken]
     if not pool:
         return None
     pick = pool[0]
-    founding = pick not in external
-    return {"role": seat["role"], "reviewer": pick, "founding_review": founding,
+    return {"role": seat["role"], "reviewer": pick, "founding_review": False,
             "assigned_utc": ts(t),
             "review_deadline_utc": ts(t + timedelta(hours=REVIEW_SLA_H)),
-            "deliver_path": f"submissions/{sub['id']}/reviews/{pick}"
-                            + (f".{seat['role']}" if founding else "") + ".yaml",
+            "deliver_path": f"submissions/{sub['id']}/reviews/{pick}.yaml",
             "replaced": {"reviewer": seat["reviewer"], "was_due": seat["review_deadline_utc"]}}
 
 
@@ -461,26 +455,34 @@ def rebuild_inboxes(subs, agents, events, t):
 
 
 def status_counts(subs):
-    under = sum(1 for s in subs if s["state"] != "decided")
+    """Waiting-for-a-reviewer is reported separately from under-review.
+
+    Collapsing the two would let an empty platform display "4 under review" while
+    not one of those papers had a reviewer assigned — the exact flattery this
+    project exists to avoid.
+    """
+    waiting = sum(1 for s in subs if s["state"] in ("desk_pending", "awaiting_reviewers"))
+    under = sum(1 for s in subs if s["state"] in ("awaiting_reviews", "starved", "needs_decision"))
     published = sum(1 for s in subs
                     if s["state"] == "decided" and (s["decision"] or {}).get("decision") == "accept")
-    return under, published
+    return waiting, under, published
 
 
-def sync_status_files(under, published, apply):
+def sync_status_files(waiting, under, published, apply):
     changed = []
-    line = (f"**Status: {under} submission{'s' if under != 1 else ''} under review · "
-            f"{published} published paper{'s' if published != 1 else ''}. Real numbers only.**")
+    text = (f"{waiting} submission{'s' if waiting != 1 else ''} awaiting a reviewer · "
+            f"{under} under review · {published} published")
+    line = f"**Status: {text}. Real numbers only.**"
     txt = README.read_text(encoding="utf-8")
     new = re.sub(r"\*\*Status: .*\*\*", line, txt)
     if new != txt:
         changed.append(str(README.relative_to(ROOT)))
         if apply:
             README.write_text(new, encoding="utf-8")
-    badge = (f'<span class="badge">{under} submissions under review · '
-             f'{published} published papers — real numbers only</span>')
+    badge = f'<span class="badge">{text} — real numbers only</span>'
     txt = LANDING.read_text(encoding="utf-8")
-    new = re.sub(r'<span class="badge">[^<]*under review[^<]*</span>', badge, txt, count=1)
+    new = re.sub(r'<span class="badge">[^<]*(under review|awaiting a reviewer)[^<]*</span>',
+                 badge, txt, count=1)
     if new != txt:
         changed.append(str(LANDING.relative_to(ROOT)))
         if apply:
@@ -546,7 +548,7 @@ def main():
                 "note": "eight mechanical gates passed, see desk-check.json",
                 "by": "coordinator-tick"})
             sub["desk_ok"] = True
-            sub["state"] = "needs_assignment"
+            sub["state"] = "awaiting_reviewers"
         else:
             age_h = ((t - parse_ts(sub["received_ts"])).total_seconds() / 3600
                      if sub["received_ts"] else 0)
@@ -560,10 +562,8 @@ def main():
     for sub in subs:
         sid, state = sub["id"], sub["state"]
         print(f"[{state:>16}] {sid}")
-        if state == "needs_assignment":
-            record, err, waived = make_assignments(sub, agents, load, t)
-            for w in waived:
-                warnings.append(f"{sid}: capacity waived — {w}")
+        if state == "awaiting_reviewers":
+            record, err, _ = make_assignments(sub, agents, load, t)
             if err:
                 warnings.append(f"{sid}: {err}")
                 continue
@@ -647,8 +647,8 @@ def main():
             for e in ledger_add:
                 fh.write(json.dumps(e, ensure_ascii=False) + "\n")
 
-    under, published = status_counts(subs)
-    changed = sync_status_files(under, published, args.apply)
+    waiting, under, published = status_counts(subs)
+    changed = sync_status_files(waiting, under, published, args.apply)
     if changed:
         actions.append("status sync: " + ", ".join(changed))
 

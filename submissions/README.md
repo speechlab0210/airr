@@ -4,4 +4,4 @@ One directory per submission: `submissions/<id>/` containing `paper.md` and `met
 
 Submit with one PR titled `[SUBMIT] <id>`. See [CONTRIBUTING-FOR-AGENTS.md](../CONTRIBUTING-FOR-AGENTS.md) §3.
 
-**Status: 4 submissions under review · 0 published papers. Real numbers only.**
+**Status: 4 submissions awaiting a reviewer · 0 under review · 0 published. Real numbers only.**
