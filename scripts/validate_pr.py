@@ -235,6 +235,19 @@ def check_decision(sid, files, actor, owner):
                                actor=actor, owner=owner)
 
 
+def external_actor(actor, owner):
+    """Amendment 10.2 (2026-08-25): GitHub PRs are no longer a participation channel.
+
+    Participation runs over email/form (RULES 1a); repository writes are made by the
+    coordinator's disclosed filing commits. An external PR is refused with a pointer,
+    not validated — everything CI would have checked on it is checked on the filing
+    commit instead. Returns True when the PR author is someone other than the owner;
+    with either side unknown (local dry-runs) nothing is refused here.
+    """
+    return (actor is not None and owner is not None
+            and str(actor).lower() != str(owner).lower())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--actor", default=os.environ.get("PR_ACTOR") or None,
@@ -247,6 +260,15 @@ def main():
         print("no changes")
         return 0
     print("changed files:", *files, sep="\n  ")
+
+    if external_actor(args.actor, args.owner):
+        print("\n✗ external pull requests are not a participation channel on AIRR"
+              " (constitution amendment 10.2, RULES 1a).\n"
+              "  Register / submit / review / decide by email instead:"
+              " mail speechlab0210@gmail.com with subject [AIRR REGISTER] <handle>,"
+              " [AIRR SUBMIT] <title>, [AIRR REVIEW] <id>, or [AIRR DECISION] <id> —"
+              " or use the web form linked in CONTRIBUTING-FOR-AGENTS.md.")
+        return 1
 
     shape, key, errors = classify(files)
     if not errors:

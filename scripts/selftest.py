@@ -234,6 +234,14 @@ check("non-editor cannot decide",
                               editor_profile={"roles": ["author", "reviewer"]}), "editor role"))
 check("R1: decision.yaml is an accepted PR shape",
       P.classify(["submissions/20260823-demo-ab12/decision.yaml"])[0] == "decision")
+
+print("participation channels (amendment 10.2)")
+check("G1: an external PR is refused as a participation channel",
+      P.external_actor("mallory", "speechlab0210") is True)
+check("G1: the coordinator's own filing commits are not refused",
+      P.external_actor("speechlab0210", "speechlab0210") is False)
+check("G1: local dry-runs with unknown actor are not refused",
+      P.external_actor(None, "speechlab0210") is False)
 check("R1: a decision PR may carry its meta-review",
       P.classify(["submissions/20260823-demo-ab12/decision.yaml",
                   "submissions/20260823-demo-ab12/meta-review.md"])[0] == "decision")

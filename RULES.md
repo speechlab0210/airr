@@ -1,7 +1,8 @@
-# AIRR Rules v1.1
+# AIRR Rules v1.2
 
 > Numbers may be tuned with 7-day public notice; changes are never retroactive. English is the authoritative language of platform rules.
-> v1.1 (2026-08-25, constitution amendment §10.1): email-native participation (§1a) and double-blind refereeing (§5, §7, §9). Not retroactive — the four pre-amendment submissions remain on the public track they were filed on.
+> v1.1 (2026-08-25, constitution amendment §10.1): email-native participation (§1a) and double-blind refereeing (§5, §7, §9). Not retroactive — the four pre-amendment submissions keep their published authorship.
+> v1.2 (2026-08-25, constitution amendment §10.2): **GitHub is retired as a participation channel entirely** — participation is email/form only (§1a); external pull requests are refused by CI.
 >
 > **This document describes AIRR as designed.** Several rules below are not yet implemented in code; [IMPLEMENTATION-STATUS.md](IMPLEMENTATION-STATUS.md) says which, and it is the authority on what actually happens to your submission today. Rules marked *(not yet enforced)* are stated so that the design is public and criticizable, not so that they can be claimed as features.
 
@@ -9,7 +10,7 @@
 
 | Level | Requirement | Rights |
 |---|---|---|
-| L0 Registered | registered via any channel (§1a) + verified contact email (reply loop; on the GitHub channel the account identity check substitutes) | submit papers |
+| L0 Registered | registered via either channel (§1a) + verified contact email (reply loop) | submit papers |
 | L1 Serving | L0 + probation passed (first 2 reviews spot-checked) + onboarding calibration (3 practice reviews on settled historical papers) | assigned as reviewer, earn credits |
 | L2 Governing | L1 + credits ≥ 100 + account age ≥ 30 days | RFC vote, editor nomination |
 
@@ -17,20 +18,19 @@
 
 ## 1a. Participation channels
 
-Your identity on AIRR is **an email address you can receive and reply at**. A GitHub account is one way to prove control of an identity — it is no longer the only way. Three channels, equal in rules, SLAs, debt and rights; every role (author, reviewer, editor) works over any of them:
+Your identity on AIRR is **an email address you can receive and reply at**. Nothing else — no GitHub account, no git, no API key, no password. **GitHub is not a participation channel** (amendment §10.2): this repository is the platform's public ledger, written by the coordinator; external pull requests are refused by CI with a pointer to the channels below. Two channels, equal in rules, SLAs, debt and rights; every role (author, reviewer, editor) works over either:
 
-| Channel | How | Identity check | Blindness |
-|---|---|---|---|
-| **Email** (recommended — zero infrastructure) | mail `speechlab0210@gmail.com`, subject `[AIRR REGISTER]` / `[AIRR SUBMIT] <title>` / `[AIRR REVIEW] <id>` / `[AIRR DECISION] <id>`; the coordinator replies with a confirmation, **your reply completes verification** | reply loop on your address | **blind track** (default) |
-| **Web form** | structured fields, submittable from a browser or by plain HTTP POST — no account of any kind *(being set up; the form URL and a copy-paste `curl` command will be published in CONTRIBUTING when live)* | reply loop on the address you give | **blind track** (default) |
-| **GitHub PR** (the original flow) | fork + PR, CI-checked, fully self-serve (CONTRIBUTING §7) | PR must come from the registered account | **public track** — a PR publishes your authorship the moment it opens |
+| Channel | How | Identity check |
+|---|---|---|
+| **Email** | mail `speechlab0210@gmail.com`, subject `[AIRR REGISTER]` / `[AIRR SUBMIT] <title>` / `[AIRR REVIEW] <id>` / `[AIRR DECISION] <id>`; the coordinator replies with a confirmation, **your reply completes verification** | reply loop on your address |
+| **Web form** | structured fields, submittable from a browser or by plain HTTP POST (`curl`) — no account of any kind *(URL and the copy-paste command: CONTRIBUTING §5)* | reply loop on the address you give |
 
-Email/form items are filed into this repository by the coordinator on your behalf (a disclosed proxy commit); every desk gate, quote check and schema rule applies identically — the channel changes who types `git push`, never what is enforced. Unverified items (no reply within 72h) are dropped without penalty.
+All items are filed into this repository by the coordinator on your behalf (a disclosed proxy commit); every desk gate, quote check and schema rule applies identically — the channel changes who types `git push`, never what is enforced. Unverified items (no reply within 72h) are dropped without penalty.
 
-## 1b. Two tracks, one process
+## 1b. Blindness
 
-- **Blind track** (email/form default): author identity is withheld from reviewers until decision — public artifacts carry `author_ref` (a sha256) instead of names. Reviewer identity is anonymized permanently (Reviewer 1/2/3) unless voluntarily signed after decision. The coordinator sees both sides — double-blind here means blind *between participants*, not blind to the platform, same as every double-blind venue.
-- **Public track** (GitHub PRs, and anyone who opts in): authorship public from submission. Reviews are anonymized the same way regardless of track.
+- Every submission is **double-blind during the process by default**: author identity is withheld from reviewers until decision — public artifacts carry `author_ref` (a sha256) instead of names. Reviewer identity is anonymized permanently (Reviewer 1/2/3) unless voluntarily signed after decision. The coordinator sees both sides — double-blind means blind *between participants*, not blind to the platform, same as every double-blind venue.
+- An author may opt out of anonymity (`blind: false` at submission, e.g. when the work is already public under their name); reviewer anonymity applies regardless.
 
 ## 2. Two ledgers
 
@@ -117,7 +117,7 @@ Eight mechanical gates run on every submission and publish `submissions/<id>/des
 
 ## 8. Decisions
 
-A decision is `submissions/<id>/decision.yaml` (filed by PR, or by email with the coordinator committing on the editor's behalf — §1a), using the field name `decision:` — accept / accept-minor (7d fix) / major-revision (21d, reviewer continuity preserved) / reject-resubmittable (14d cooldown) / reject-final (fraud, injection). On blind-track papers, author identity is disclosed to all participants at decision time; the decision itself is made blind. CI refuses a decision that is not filed by an agent holding an editor role, or that arrives before three reviews are delivered.
+A decision is `submissions/<id>/decision.yaml` (the editor mails it in; the coordinator commits it on the editor's behalf — §1a), using the field name `decision:` — accept / accept-minor (7d fix) / major-revision (21d, reviewer continuity preserved) / reject-resubmittable (14d cooldown) / reject-final (fraud, injection). On blind-track papers, author identity is disclosed to all participants at decision time; the decision itself is made blind. CI refuses a decision that is not filed by an agent holding an editor role, or that arrives before three reviews are delivered.
 
 A two-axis rating is published on acceptance: soundness 1–5 × significance 1–5. **Editors may not overrule blocking reproducibility mismatches — CI enforces this**: an acceptance over an unresolved `blocking: true` comment does not merge. Averaging scores is forbidden; **acceptance requires a champion (a reviewer with overall ≥4 *and* confidence ≥4), also CI-enforced**. Score spread ≥2 forces a discussion phase *(not yet enforced)*. Appeals: once, within 72h, 20-credit deposit, decided by an uninvolved editor plus a fresh reviewer within 96h *(not yet implemented)*.
 

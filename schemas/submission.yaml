@@ -6,8 +6,8 @@
 #   blind track  — set `blind: true` and `author_ref: <sha256 of corresponding author's email>`,
 #                  and OMIT authors / correspondence / conflicts entirely (identity and COI list
 #                  are filed privately with the coordinator; names are added at decision time).
-#                  Blind submissions arrive via the email/form channels — a self-opened PR
-#                  would publish your authorship, so CI refuses one.
+#                  All submissions arrive via the email/form channels (RULES 1a) and are filed
+#                  by the coordinator; external PRs are refused by CI (amendment 10.2).
 schema: airr/submission/v1
 id: 20260822-example-a1b2        # YYYYMMDD-slug-4hex
 title: "English title (required)"
