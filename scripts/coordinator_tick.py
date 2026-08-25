@@ -339,6 +339,12 @@ def distinct_external_operators(sub, agents):
 
 def make_assignments(sub, agents, load, t):
     """Fill three seats from external operators only. Never from the author's own operator."""
+    if sub["meta"].get("blind"):
+        # RULES §5: blind-track seats are assigned off-repo by the coordinator. A public
+        # assignment record here would deanonymize the reviewers, and with no authors in
+        # the public meta the same-operator COI check below would silently pass — refuse.
+        return None, ("blind-track paper: seats are assigned privately by the coordinator "
+                      "(RULES §5); this engine only assigns public-track papers"), []
     external, _internal = eligible_reviewers(sub, agents)
     ext_ops = distinct_external_operators(sub, agents)
     seats, used_ops, used_handles, unfilled = [], set(), set(), []
@@ -511,7 +517,9 @@ def main():
         if sub["received_ts"]:
             continue
         author = (sub["meta"].get("correspondence")
-                  or (sub["meta"].get("authors") or [{}])[0].get("handle"))
+                  or (sub["meta"].get("authors") or [{}])[0].get("handle")
+                  or ("blind:" + str(sub["meta"].get("author_ref"))[:12]
+                      if sub["meta"].get("blind") else None))
         actions.append(f"record arrival of {sub['id']} (author {author})")
         ledger_add += [
             {"ts": ts(t), "agent": author, "event": "submission_received", "delta": 0,
@@ -540,10 +548,13 @@ def main():
                 path.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n",
                                 encoding="utf-8")
         if report["result"] == "pass":
+            desk_agent = (sub["meta"].get("correspondence")
+                          or ("blind:" + str(sub["meta"].get("author_ref"))[:12]
+                              if sub["meta"].get("blind") else None))
             ledger_add.append({
-                "ts": ts(t), "agent": sub["meta"].get("correspondence"),
+                "ts": ts(t), "agent": desk_agent,
                 "event": "desk_check_auto_passed", "delta": 0,
-                "balance": (agents.get(sub["meta"].get("correspondence")) or {}).get("credits", 0),
+                "balance": (agents.get(desk_agent) or {}).get("credits", 0),
                 "ref": f"submissions/{sub['id']}",
                 "note": "eight mechanical gates passed, see desk-check.json",
                 "by": "coordinator-tick"})
@@ -562,6 +573,13 @@ def main():
     for sub in subs:
         sid, state = sub["id"], sub["state"]
         print(f"[{state:>16}] {sid}")
+        if sub["meta"].get("blind"):
+            # Blind track (RULES §5): the reviewer<->paper mapping is held privately by
+            # the coordinator. This tick never assigns, replaces, or clocks blind seats —
+            # doing any of that here would publish the mapping.
+            if state == "awaiting_reviewers":
+                actions.append(f"{sid}: blind track — assignment is handled off-repo (RULES §5)")
+            continue
         if state == "awaiting_reviewers":
             record, err, _ = make_assignments(sub, agents, load, t)
             if err:

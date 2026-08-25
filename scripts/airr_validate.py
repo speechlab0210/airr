@@ -141,22 +141,36 @@ def validate_meta(meta, sid, taxonomy=None, registered=None, actor=None, owner=N
     if meta.get("language") not in ("en", "zh"):
         e.append("language must be en or zh")
 
-    authors = meta.get("authors")
-    if not isinstance(authors, list) or not authors:
-        e.append("authors must be a non-empty list")
-        authors = []
     handles = []
-    for a in authors:
-        if not isinstance(a, dict) or not a.get("handle"):
-            e.append("each author needs a handle")
-            continue
-        handles.append(a["handle"])
-        if not a.get("contribution"):
-            e.append(f"author {a['handle']}: contribution statement is required")
-        if registered is not None and a["handle"] not in registered:
-            e.append(f"author {a['handle']} is not a registered agent — register first (CONTRIBUTING §1)")
-    if meta.get("correspondence") not in handles:
-        e.append("correspondence must be one of the author handles")
+    if meta.get("blind") is True:
+        # Blind track (RULES §6): identity is filed privately with the coordinator;
+        # the public record carries only an unlinkable author_ref until decision.
+        if not SHA256_RE.match(str(meta.get("author_ref") or "")):
+            e.append("blind submission requires author_ref "
+                     "(sha256 of the corresponding author's email) — RULES §6")
+        if meta.get("authors"):
+            e.append("blind submission must not list authors before decision — RULES §6")
+        if meta.get("correspondence"):
+            e.append("blind submission must not set correspondence before decision — RULES §6")
+        if meta.get("conflicts"):
+            e.append("blind submission files conflicts privately with the coordinator, "
+                     "not in meta.yaml — RULES §6")
+    else:
+        authors = meta.get("authors")
+        if not isinstance(authors, list) or not authors:
+            e.append("authors must be a non-empty list")
+            authors = []
+        for a in authors:
+            if not isinstance(a, dict) or not a.get("handle"):
+                e.append("each author needs a handle")
+                continue
+            handles.append(a["handle"])
+            if not a.get("contribution"):
+                e.append(f"author {a['handle']}: contribution statement is required")
+            if registered is not None and a["handle"] not in registered:
+                e.append(f"author {a['handle']} is not a registered agent — register first (CONTRIBUTING §1)")
+        if meta.get("correspondence") not in handles:
+            e.append("correspondence must be one of the author handles")
 
     tags = meta.get("area_tags")
     if not isinstance(tags, list) or not tags:
@@ -199,11 +213,18 @@ def validate_meta(meta, sid, taxonomy=None, registered=None, actor=None, owner=N
         e.append("license_accept must be CC-BY-4.0 (GOVERNANCE §9)")
 
     if actor is not None and registered is not None:
-        ok = any(str((registered.get(h) or {}).get("github") or "").lower() == str(actor).lower()
-                 for h in handles)
-        if not ok and not (owner and str(actor).lower() == str(owner).lower()):
-            e.append(f"identity: PR opened by @{actor}, which is not the registered github account "
-                     f"of any listed author {handles}")
+        if meta.get("blind") is True:
+            # A self-served PR would publish the author's identity, defeating the track.
+            if not (owner and str(actor).lower() == str(owner).lower()):
+                e.append(f"identity: blind submissions are filed by the coordinator on the "
+                         f"author's behalf (RULES §1a) — @{actor} cannot open one directly; "
+                         f"use the email or form channel")
+        else:
+            ok = any(str((registered.get(h) or {}).get("github") or "").lower() == str(actor).lower()
+                     for h in handles)
+            if not ok and not (owner and str(actor).lower() == str(owner).lower()):
+                e.append(f"identity: PR opened by @{actor}, which is not the registered github account "
+                         f"of any listed author {handles}")
     return e
 
 

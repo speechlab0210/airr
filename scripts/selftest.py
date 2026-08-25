@@ -144,6 +144,39 @@ check("stranger cannot submit under your handle",
       has(V.validate_meta(meta(), "20260823-demo-ab12", taxonomy={"cs.ml"},
                           registered={"alice": profile()}, actor="mallory"), "identity"))
 
+print("blind track (amendment 10.1: RULES 1a/1b/6)")
+
+
+def blind_meta(**kw):
+    m = meta(blind=True, author_ref="c" * 64)
+    for k in ("authors", "correspondence"):
+        m.pop(k, None)
+    m.update(kw)
+    return m
+
+
+check("B1: clean blind meta passes with no registered authors at all",
+      V.validate_meta(blind_meta(), "20260823-demo-ab12", taxonomy={"cs.ml"},
+                      registered={}) == [])
+check("B1: blind without author_ref is refused",
+      has(V.validate_meta(blind_meta(author_ref=None), "20260823-demo-ab12",
+                          taxonomy={"cs.ml"}), "author_ref"))
+check("B1: blind carrying an authors list is refused",
+      has(V.validate_meta(blind_meta(authors=[{"handle": "alice", "contribution": "x"}]),
+                          "20260823-demo-ab12", taxonomy={"cs.ml"}), "must not list authors"))
+check("B1: blind carrying correspondence is refused",
+      has(V.validate_meta(blind_meta(correspondence="alice"), "20260823-demo-ab12",
+                          taxonomy={"cs.ml"}), "correspondence"))
+check("B1: blind carrying a public conflicts list is refused",
+      has(V.validate_meta(blind_meta(conflicts=["alice"]), "20260823-demo-ab12",
+                          taxonomy={"cs.ml"}), "privately"))
+check("B2: a stranger's PR cannot file a blind submission (it would deanonymize itself)",
+      has(V.validate_meta(blind_meta(), "20260823-demo-ab12", taxonomy={"cs.ml"},
+                          registered={}, actor="mallory", owner="platform"), "coordinator"))
+check("B2: the coordinator files blind submissions on the author's behalf",
+      V.validate_meta(blind_meta(), "20260823-demo-ab12", taxonomy={"cs.ml"},
+                      registered={}, actor="platform", owner="platform") == [])
+
 print("reviews")
 check("assigned review with verbatim quotes passes",
       V.validate_review(review(), "20260823-demo-ab12", "bob", None, SEATS, PAPER,
@@ -247,6 +280,12 @@ check("R5: the author's own operator is NEVER assigned a seat — the paper wait
       rec is None and "waits for a reviewer" in (err or ""), err)
 check("R5: refusal names how many external operators actually exist",
       "0 distinct external operator" in (err or ""), err)
+
+bsub = {"id": "20260823-blnd-cd34", "meta": blind_meta(id="20260823-blnd-cd34")}
+rec, err, _ = C.make_assignments(bsub, {"bob": agent("bob", "b" * 64)}, {"bob": 0}, T)
+check("B3: the public engine refuses blind-track papers even with reviewers available "
+      "(no public COI data + a public record would deanonymize seats)",
+      rec is None and "privately" in (err or ""), err)
 
 sibling = {"alice": agent("alice", OP_A), "bob": agent("bob", OP_B)}
 rec, err, _ = C.make_assignments(sub, sibling, {h: 0 for h in sibling}, T)

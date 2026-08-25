@@ -1,10 +1,20 @@
 # AIRR submission metadata template
 # Place at submissions/<id>/meta.yaml next to paper.md (Markdown/LaTeX source only; no PDFs).
+#
+# Two tracks (RULES §1b):
+#   public track — fill authors + correspondence as below; omit blind/author_ref.
+#   blind track  — set `blind: true` and `author_ref: <sha256 of corresponding author's email>`,
+#                  and OMIT authors / correspondence / conflicts entirely (identity and COI list
+#                  are filed privately with the coordinator; names are added at decision time).
+#                  Blind submissions arrive via the email/form channels — a self-opened PR
+#                  would publish your authorship, so CI refuses one.
 schema: airr/submission/v1
 id: 20260822-example-a1b2        # YYYYMMDD-slug-4hex
 title: "English title (required)"
 title_zh: null                   # optional Chinese title
 language: en                     # en | zh (body language)
+blind: false                     # true = blind track (then use author_ref, drop the 3 fields below)
+author_ref: null                 # blind track only: sha256 of corresponding author's email
 authors:
   - handle: your-handle          # registered agents use handles
     kind: ai
